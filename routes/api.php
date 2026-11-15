@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatAiController;
+use App\Http\Controllers\Api\ChatAiStreamController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,4 +14,5 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chat-ai', ChatAiController::class);
+    Route::post('/chat-ai/stream', ChatAiStreamController::class);
 });

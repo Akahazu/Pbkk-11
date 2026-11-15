@@ -16,6 +16,7 @@ class ChatAiRequest extends FormRequest
         return [
             'prompt' => ['required', 'string', 'max:1000'],
             'session_id' => ['nullable', 'integer', 'exists:chat_sessions,id'],
+            'stream' => ['nullable', 'boolean'],
         ];
     }
 }
