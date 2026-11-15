@@ -8,14 +8,13 @@ use App\Http\Resources\ChatAiResponseResource;
 use App\Models\AiLog;
 use App\Models\ChatMessage;
 use App\Models\ChatSession;
-use App\Services\SenopatiService;
+use App\Services\LlmService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class ChatAiController extends Controller
 {
-    public function __invoke(ChatAiRequest $request, SenopatiService $senopati)
+    public function __invoke(ChatAiRequest $request, LlmService $llm)
     {
         $user = $request->user();
         $prompt = $request->string('prompt')->toString();
@@ -45,6 +44,11 @@ class ChatAiController extends Controller
             ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
             ->all();
 
+        $systemPrompt = config('services.senopati.system_prompt');
+        if (! empty($systemPrompt)) {
+            array_unshift($history, ['role' => 'system', 'content' => $systemPrompt]);
+        }
+
         if (count($history) > 40) {
             Log::warning('Chat history exceeds 40 messages', [
                 'session_id' => $session->id,
@@ -52,11 +56,11 @@ class ChatAiController extends Controller
             ]);
         }
 
-        // Call Senopati
+        // Call LLM (Ollama -> Senopati fallback)
         try {
-            $reply = $senopati->chat($history);
-        } catch (RuntimeException $e) {
-            Log::error('Senopati failure', [
+            $reply = $llm->chat($history);
+        } catch (\Throwable $e) {
+            Log::error('AI service failure', [
                 'session_id' => $session->id,
                 'error' => $e->getMessage(),
             ]);
