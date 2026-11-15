@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'senopati' => [
+        'base_url' => env('SENOPATI_BASE_URL'),
+        'api_key' => env('SENOPATI_API_KEY'),
+    ],
 ];
