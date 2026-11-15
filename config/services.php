@@ -40,5 +40,12 @@ return [
         'api_key' => env('SENOPATI_API_KEY'),
         'model' => env('SENOPATI_MODEL', 'qwen3:14b'),
         'timeout' => (int) env('SENOPATI_TIMEOUT', 60),
+        'system_prompt' => env('SENOPATI_SYSTEM_PROMPT', 'Kamu adalah SOC Analyst AI dari tim Security Operations Center yang membantu analis keamanan mendeteksi, menganalisis, dan merespons insiden keamanan siber. Fokus pada threat detection, incident response, firewall rules, IP blocking, dan authentication logs. Selalu jawab dalam Bahasa Indonesia yang profesional dan teknis, sertakan severity (Critical/High/Medium/Low) bila relevan, dan berikan rekomendasi yang actionable.'),
+    ],
+
+    'ollama' => [
+        'base_url' => env('OLLAMA_BASE_URL', ''),
+        'model' => env('OLLAMA_MODEL', 'llama3.2:1b'),
+        'timeout' => (int) env('OLLAMA_TIMEOUT', 3),
     ],
 ];

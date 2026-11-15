@@ -34,4 +34,44 @@ class SenopatiService
             ],
         ];
     }
+
+    public function chatStream(array $messages): \Generator
+    {
+        $response = Http::withToken(config('services.senopati.api_key'))
+            ->acceptJson()
+            ->timeout(config('services.senopati.timeout'))
+            ->withOptions(['stream' => true])
+            ->post(rtrim(config('services.senopati.base_url'), '/').'/chat/completions', [
+                'model' => config('services.senopati.model'),
+                'messages' => $messages,
+                'stream' => true,
+            ]);
+
+        $body = $response->toPsrResponse()->getBody();
+        $buffer = '';
+
+        while (! $body->eof()) {
+            $buffer .= $body->read(1024);
+
+            while (($pos = strpos($buffer, "\n")) !== false) {
+                $line = trim(substr($buffer, 0, $pos));
+                $buffer = substr($buffer, $pos + 1);
+
+                if (! str_starts_with($line, 'data: ')) {
+                    continue;
+                }
+
+                $payload = substr($line, 6);
+                if ($payload === '[DONE]') {
+                    return;
+                }
+
+                $json = json_decode($payload, true);
+                $delta = $json['choices'][0]['delta']['content'] ?? '';
+                if ($delta !== '') {
+                    yield $delta;
+                }
+            }
+        }
+    }
 }
