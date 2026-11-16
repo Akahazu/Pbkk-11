@@ -1,6 +1,16 @@
 # PBKK-11
 
+## Kelompok 2
 
+| No | Nama | NIM |
+|----|------|-----|
+| 1  | Joaquin Fairuz Nawfal Ismono | 5025241106 |
+| 2  | Muhammad Zahran Rizki Primanda | 5025241107 |
+| 3  | Hasan Abdurrahman | 5025241114 |
+| 4  | Bintang Ilham Pabeta | 5025241152 |
+| 5  | Felix Aldorino | 5025241162 |
+
+## Overview
 Backend Laravel 13 untuk platform **Agentic AI** berperan sebagai **SOC Analyst Assistant**, terintegrasi dengan **LLM Senopati ITS** dengan autentikasi token, persistence, audit log LLM, streaming SSE, system prompt injection, dan fallback otomatis Ollama → Senopati.
 
 | # | Requirement | Status | Bukti |
@@ -54,11 +64,13 @@ OLLAMA_TIMEOUT=3
 
 Satu alur untuk membuktikan **semua rubrik + challenge** sekaligus:
 
+>Catatan: Perintah di bawah ini menggunakan Bash/Linux. Jika menggunakan Windows PowerShell, gunakan Invoke-RestMethod atau Invoke-WebRequest untuk mengirim request JSON.
+
 ```bash
 # 1) Login, simpan token
 TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"demo@example.com","password":"password"}' \
+  -d '{"email":"test@example.com","password":"password"}' \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
 
 # 2) Chat JSON,  buktikan rubrik 1,2,3,4 + challenge 2
