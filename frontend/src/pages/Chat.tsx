@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Zap, Shield, AlertTriangle, Terminal } from 'lucide-react';
+import { Menu, Zap, Shield, AlertTriangle, Terminal, Code } from 'lucide-react';
 import { Sidebar } from '../components/Sidebar';
 import { ChatMessage } from '../components/ChatMessage';
 import { ChatInput } from '../components/ChatInput';
@@ -8,7 +8,8 @@ import { useChatStore } from '../store/chat';
 
 export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const {
     messages,
@@ -17,15 +18,24 @@ export default function Chat() {
     streamingMode,
     setStreamingMode,
     sendMessage,
+    rawStreamLogs,
+    showRawLogs,
+    setShowRawLogs,
+    clearRawLogs,
   } = useChatStore();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const distanceToBottom = scrollHeight - scrollTop - clientHeight;
+    setIsAtBottom(distanceToBottom <= 40);
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isSending]);
+    if (isAtBottom && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages, isSending, isAtBottom]);
 
   const suggestedPrompts = [
     "Ada 5 failed login dari IP 203.0.113.42 dalam 2 menit. Apa yang harus saya lakukan?",
@@ -56,8 +66,21 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* Streaming Mode Toggle */}
+          {/* Controls */}
           <div className="flex items-center gap-3">
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => setShowRawLogs(!showRawLogs)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-mono flex items-center gap-1.5 border transition ${
+                  showRawLogs ? 'bg-cyan-950 border-cyan-800 text-cyan-300' : 'bg-soc-card border-soc-border text-gray-400 hover:text-gray-200'
+                }`}
+                title="Toggle Raw Stream Log"
+              >
+                <Code className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Raw Log</span>
+              </button>
+            )}
+
             <div className="hidden sm:flex items-center gap-2 bg-soc-card border border-soc-border px-3 py-1.5 rounded-xl text-xs font-mono">
               <span className="text-gray-400">Mode:</span>
               <button
@@ -81,8 +104,34 @@ export default function Chat() {
           </div>
         </header>
 
+        {/* Dev Raw Stream Logs Drawer */}
+        {import.meta.env.DEV && showRawLogs && (
+          <div className="bg-gray-950 border-b border-cyan-900/50 p-3 max-h-40 overflow-y-auto font-mono text-[11px] text-cyan-400 flex-shrink-0">
+            <div className="flex items-center justify-between mb-1 pb-1 border-b border-cyan-900/30">
+              <span className="font-bold uppercase tracking-wider">Raw Stream Logs ({rawStreamLogs.length})</span>
+              <button
+                onClick={clearRawLogs}
+                className="text-gray-400 hover:text-red-400 text-[10px] underline"
+              >
+                Clear Logs
+              </button>
+            </div>
+            {rawStreamLogs.length === 0 ? (
+              <div className="text-gray-500 italic">No raw chunks received yet. Send a prompt in streaming mode.</div>
+            ) : (
+              rawStreamLogs.map((log, idx) => (
+                <div key={idx} className="whitespace-pre-wrap break-all py-0.5 border-b border-gray-900/50">{log}</div>
+              ))
+            )}
+          </div>
+        )}
+
         {/* Message List or Empty State */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
+        <div
+          ref={messagesContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 md:px-8 py-6"
+        >
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center">
               <div className="w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-4 shadow-xl shadow-blue-950">
@@ -120,8 +169,6 @@ export default function Chat() {
               {isSending && isStreaming && messages[messages.length - 1]?.role === 'user' && (
                 <TypingIndicator />
               )}
-
-              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
