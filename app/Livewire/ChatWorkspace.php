@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use League\CommonMark\CommonMarkConverter;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -51,11 +52,13 @@ class ChatWorkspace extends Component
     {
         $this->errorMessage = null;
 
+        $this->prompt = trim($this->prompt);
+
         $validated = $this->validate([
             'prompt' => ['required', 'string', 'max:1000'],
         ]);
 
-        $text = trim($validated['prompt']);
+        $text = $validated['prompt'];
         $userId = (int) Auth::id();
 
         if ($this->sessionId !== null) {
@@ -125,6 +128,16 @@ class ChatWorkspace extends Component
 
         $session->touch();
         $this->dispatch('message-persisted');
+    }
+
+    public function renderMarkdown(string $content): string
+    {
+        $converter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+
+        return (string) $converter->convert($content);
     }
 
     public function render(): View
