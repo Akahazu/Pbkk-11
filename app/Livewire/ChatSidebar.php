@@ -19,9 +19,9 @@ class ChatSidebar extends Component
     }
 
     #[On('session-created')]
-    public function onSessionCreated(int $sessionId): void
+    public function onSessionCreated($sessionId): void
     {
-        $this->activeSessionId = $sessionId;
+        $this->activeSessionId = (int) (is_array($sessionId) ? ($sessionId['sessionId'] ?? 0) : $sessionId);
     }
 
     #[On('message-persisted')]

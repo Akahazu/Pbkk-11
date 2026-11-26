@@ -22,6 +22,8 @@ class ChatWorkspace extends Component
 
     public ?string $errorMessage = null;
 
+    public bool $isThinking = false;
+
     public function mount(): void
     {
         $latest = ChatSession::where('user_id', Auth::id())
@@ -40,12 +42,6 @@ class ChatWorkspace extends Component
         $session = ChatSession::where('user_id', Auth::id())->findOrFail($sessionId);
         $this->sessionId = $session->id;
         $this->errorMessage = null;
-    }
-
-    #[On('session-created')]
-    public function handleSessionCreated(int $sessionId): void
-    {
-        $this->loadSession($sessionId);
     }
 
     public function sendPrompt(LlmService $llm): void
@@ -82,6 +78,7 @@ class ChatWorkspace extends Component
             'content' => $text,
         ]);
 
+        // Immediately clear input box for UI responsiveness
         $this->prompt = '';
 
         $history = $session->messages()

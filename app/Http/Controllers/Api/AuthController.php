@@ -22,6 +22,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Kredensial salah'], 401);
         }
 
+        // Removed potential token deletion that causes drift
         $token = $user->createToken('agent-access-token')->plainTextToken;
 
         return response()->json([

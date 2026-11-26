@@ -21,11 +21,9 @@ class ChatAiController extends Controller
 
         // Resolve / create session
         if ($request->filled('session_id')) {
-            $session = ChatSession::findOrFail($request->integer('session_id'));
-            abort_unless((int) $session->user_id === (int) $user->id, 403, 'Forbidden session');
+            $session = $user->chatSessions()->findOrFail($request->integer('session_id'));
         } else {
-            $session = ChatSession::create([
-                'user_id' => $user->id,
+            $session = $user->chatSessions()->create([
                 'title' => Str::limit($prompt, 50),
             ]);
         }

@@ -19,10 +19,8 @@ class ChatAiStreamController extends Controller
         $prompt = $request->string('prompt')->toString();
 
         $session = $request->filled('session_id')
-            ? ChatSession::findOrFail($request->integer('session_id'))
-            : ChatSession::create(['user_id' => $user->id, 'title' => Str::limit($prompt, 50)]);
-
-        abort_unless((int) $session->user_id === (int) $user->id, 403);
+            ? $user->chatSessions()->findOrFail($request->integer('session_id'))
+            : $user->chatSessions()->create(['title' => Str::limit($prompt, 50)]);
 
         ChatMessage::create([
             'chat_session_id' => $session->id,
