@@ -73,7 +73,9 @@
                         </div>
                     </template>
                     <template x-if="isStreaming">
-                        <div class="prose prose-sm max-w-none break-words [&>pre]:bg-gray-800 [&>pre]:text-gray-100 [&>pre]:p-3 [&>pre]:rounded [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:rounded" x-html="window.marked ? window.marked.parse(streamingContent) : streamingContent"></div>
+                        <div class="prose prose-sm max-w-none break-words [&>pre]:bg-gray-800 [&>pre]:text-gray-100 [&>pre]:p-3 [&>pre]:rounded [&>code]:bg-gray-200 [&>code]:px-1 [&>code]:rounded" x-html="window.marked ? window.marked.parse(streamingContent) : streamingContent" x-effect="Prism.highlightAll()"></div>
+                        <!-- Typing cursor (Challenge 1) -->
+                        <span class="bg-gray-900 animate-pulse inline-block w-[1px] h-5 mt-1 ml-1">‌</span>
                     </template>
                 </div>
             </div>
