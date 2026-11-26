@@ -12,7 +12,6 @@ document.addEventListener('alpine:init', () => {
 
         init() {
             this.sessionId = this.$wire.entangle('sessionId');
-            this.errorMessage = this.$wire.entangle('errorMessage');
         },
 
         scrollToBottom(force = false) {

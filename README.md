@@ -62,19 +62,20 @@ OLLAMA_TIMEOUT=3
 
 ## Smoke Test (End-to-End)
 
-Satu alur untuk membuktikan **semua rubrik + challenge** sekaligus:
-
->Catatan: Perintah di bawah ini menggunakan Bash/Linux. Jika menggunakan Windows PowerShell, gunakan Invoke-RestMethod atau Invoke-WebRequest untuk mengirim request JSON.
+> If you see `{"message":"Unauthenticated."}` while a valid `Authorization` header is present, the token is stale (DB reseeded, `APP_KEY` rotated, or `sanctum.expiration` elapsed). Re-run the login step in the same shell.
 
 ```bash
-# 1) Login, simpan token
+# 1) Login, simpan token (guarded)
 TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"password"}' \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["access_token"])')
 
-# 2) Chat JSON,  buktikan rubrik 1,2,3,4 + challenge 2
-curl -X POST http://127.0.0.1:8000/api/chat-ai \
+[ -n "$TOKEN" ] || { echo "login failed"; exit 1; }
+echo "Using token ${TOKEN:0:12}..."
+
+# 2) Chat JSON, buktikan rubrik 1,2,3,4 + challenge 2
+curl -i -X POST http://127.0.0.1:8000/api/chat-ai \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
@@ -121,6 +122,8 @@ $ curl -i -X POST http://127.0.0.1:8000/api/chat-ai \
 HTTP/1.1 401 Unauthorized
 {"message":"Unauthenticated."}
 ```
+
+> **Frontend Contract**: Any client calling `/api/chat-ai` or `/api/chat-ai/stream` must send `Authorization: Bearer <token>` obtained from `POST /api/login`. `EventSource` is not usable for the stream endpoint because it cannot set custom headers; use `fetch` + `ReadableStream`.
 
 ---
 
