@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-primary leading-tight">
                 {{ __('SOC Agentic AI Chat Hub') }}
             </h2>
             <span class="text-xs text-gray-500">Livewire Workspace</span>

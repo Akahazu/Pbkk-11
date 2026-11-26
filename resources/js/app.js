@@ -1,5 +1,31 @@
 import './api';
 
+// Theme toggle
+(function() {
+    const toggle = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('theme-toggle-sun');
+    const moonIcon = document.getElementById('theme-toggle-moon');
+    const html = document.documentElement;
+
+    function updateIcons(isDark) {
+        if (sunIcon && moonIcon) {
+            sunIcon.classList.toggle('hidden', isDark);
+            moonIcon.classList.toggle('hidden', !isDark);
+        }
+    }
+
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateIcons(isDark);
+        });
+
+        const isDark = html.classList.contains('dark');
+        updateIcons(isDark);
+    }
+})();
+
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('chatWorkspace', () => ({
         sessionId: null,
@@ -11,7 +37,7 @@ document.addEventListener('alpine:init', () => {
         abortController: null,
 
         init() {
-            this.sessionId = this.$wire.entangle('sessionId');
+            this.sessionId = this.$wire.get('sessionId') || null;
         },
 
         scrollToBottom(force = false) {
